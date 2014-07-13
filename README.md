@@ -1,7 +1,7 @@
 ![Savage XR](http://savagexr.com/media/savagexr_logo_600.png)
-savage-master-server
+Savage XR Master Server
 ====================
-This repository hosts the code of the Savage XR Master Server. The whole responsibility of the master server is it to 
+The repository hosts the code of the Savage XR Master Server. The whole responsibility of the master server is it to 
 generate a server list for Savage XR clients. To do that the master server stores state information provided by 
 Savage XR gaming servers via heart-beating.
 
@@ -12,11 +12,11 @@ Savage XR gaming servers via heart-beating.
 ## Getting Started
 Simply download the [savage-master-server-1.0.3.jar](https://github.com/valliman/savage-master-server/releases/download/1.0.3/master-server-1.0.3.jar)
 
-> Open a command shell and start the server with the following command
+> Open a command shell and start the server with the following command:
 * `java -jar savage-master-server-1.0.3.jar`
 
 ## Configuration
-The server allows to configure some properties, listed below.
+The server allows to configure some properties, which are listed below:
 
 > listening port of the master server, default: 11236
 * `listening.port = 11236` 
