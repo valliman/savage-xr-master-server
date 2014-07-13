@@ -1,4 +1,3 @@
-![Logo](http://savagexr.com/media/savagexr_icon_64.png)
 ![Savage XR](http://savagexr.com/media/savagexr_logo_600.png)
 savage-master-server
 ====================
