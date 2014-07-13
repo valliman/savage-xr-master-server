@@ -5,6 +5,10 @@ This repository hosts the code of the Savage XR Master Server. The whole respons
 generate a server list for Savage XR clients. To do that the master server stores state information provided by 
 Savage XR gaming servers via heart-beating.
 
+## Requirements
+
+> Java 1.8
+
 ## Getting Started
 Simply download the savage-master-server-1.0.0.jar
 
