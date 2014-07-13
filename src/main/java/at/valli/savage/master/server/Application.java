@@ -11,7 +11,7 @@ import java.io.IOException;
 public class Application {
 
     private static final Logger LOG = LogManager.getLogger(Application.class);
-    private static final int UDP_LISTENING_PORT = Integer.getInteger("udp.listening.port", 11236);
+    private static final int UDP_LISTENING_PORT = Integer.getInteger("listening.port", 11236);
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void main(final String[] args) {
