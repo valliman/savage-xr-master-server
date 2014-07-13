@@ -1,5 +1,6 @@
 package at.valli.savage.master.server.state;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -18,7 +19,7 @@ public final class ServerStateRegistry {
     private Set<ServerState> states = new HashSet<>();
 
     public void add(ServerState serverState) {
-
+        Validate.notNull(serverState, "serverState must not be null");
         synchronized (LOCK) {
             states.remove(serverState);
             states.add(serverState);
@@ -27,6 +28,7 @@ public final class ServerStateRegistry {
     }
 
     public void remove(ServerState serverState) {
+        Validate.notNull(serverState, "serverState must not be null");
         synchronized (LOCK) {
             states.remove(serverState);
             LOG.info("Current server registry state {}", states);

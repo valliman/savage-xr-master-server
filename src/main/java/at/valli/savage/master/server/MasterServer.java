@@ -4,6 +4,7 @@ import at.valli.savage.master.server.file.StateWriterThread;
 import at.valli.savage.master.server.network.TCPHandlerThread;
 import at.valli.savage.master.server.network.UDPHandlerThread;
 import at.valli.savage.master.server.state.ServerStateRegistry;
+import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,6 +27,7 @@ public final class MasterServer {
     private StateWriterThread datFileWriter;
 
     public MasterServer(int port) {
+        Validate.inclusiveBetween(0, 65535, port, "invalid port provided");
         this.port = port;
     }
 

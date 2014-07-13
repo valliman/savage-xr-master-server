@@ -1,5 +1,6 @@
 package at.valli.savage.master.server.util;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,6 +18,7 @@ public final class FutureEvaluator extends Thread {
     private Future<?> future;
 
     public FutureEvaluator(final Future<?> future) {
+        Validate.notNull(future, "future must not be null");
         this.future = future;
     }
 
