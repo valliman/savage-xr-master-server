@@ -7,7 +7,7 @@ Savage XR gaming servers via heart-beating.
 
 ## Requirements
 
-> Java 1.8
+> Java 1.7
 
 ## Getting Started
 Simply download the [savage-master-server-1.0.0.jar](https://github.com/valliman/savage-master-server/releases/download/1.0.0/master-server-1.0.0.jar)
