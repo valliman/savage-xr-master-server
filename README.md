@@ -1,7 +1,9 @@
 ![Savage XR](http://savagexr.com/media/savagexr_logo_600.png)
 savage-master-server
 ====================
-Master Server for Savage XR.
+This repository hosts the code of the Savage XR Master Server. The whole responsibility of the master server is it to 
+generate a server list for Savage XR clients. To do that the master server stores state information provided by 
+Savage XR gaming servers via heart-beating.
 
 ## Getting Started
 Simply download the savage-master-server-1.0.0.jar
