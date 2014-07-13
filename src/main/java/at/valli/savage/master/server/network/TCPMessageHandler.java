@@ -11,7 +11,7 @@ import java.util.Arrays;
 /**
  * Created by valli on 13.07.2014.
  */
-class TCPMessageHandler implements Runnable {
+final class TCPMessageHandler implements Runnable {
 
     private static final Logger LOG = LogManager.getLogger(TCPMessageHandler.class);
 
