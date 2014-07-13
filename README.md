@@ -10,10 +10,10 @@ Savage XR gaming servers via heart-beating.
 > Java 1.7
 
 ## Getting Started
-Simply download the [savage-master-server-1.0.2.jar](https://github.com/valliman/savage-master-server/releases/download/1.0.2/master-server-1.0.2.jar)
+Simply download the [savage-master-server-1.0.3.jar](https://github.com/valliman/savage-master-server/releases/download/1.0.3/master-server-1.0.3.jar)
 
 > Open a command shell and start the server with the following command
-* `java -jar savage-master-server-1.0.2.jar`
+* `java -jar savage-master-server-1.0.3.jar`
 
 ## Configuration
 The server allows to configure some properties, listed below.
