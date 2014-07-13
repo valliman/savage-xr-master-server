@@ -18,8 +18,8 @@ Simply download the [savage-master-server-1.0.3.jar](https://github.com/valliman
 ## Configuration
 The server allows to configure some properties, listed below.
 
-> udp listening port of the master server, default: 11236
-* `udp.listening.port = 11236` 
+> listening port of the master server, default: 11236
+* `listening.port = 11236` 
 
 > path and name of the dat file to be written, default: ./gamelist_full.dat
 * `dat.file = ./gamelist_full.dat` 
