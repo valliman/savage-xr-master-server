@@ -13,7 +13,6 @@ public class Application {
     private static final Logger LOG = LogManager.getLogger(Application.class);
     private static final int UDP_LISTENING_PORT = Integer.getInteger("listening.port", 11236);
 
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public static void main(final String[] args) {
         MasterServer masterServer = new MasterServer(UDP_LISTENING_PORT);
         masterServer.start();
