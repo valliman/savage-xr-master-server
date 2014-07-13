@@ -84,10 +84,7 @@ final class FileStateWriter implements Runnable {
         stream.writeByte(Integer.valueOf(segments[1]).byteValue());
         stream.writeByte(Integer.valueOf(segments[2]).byteValue());
         stream.writeByte(Integer.valueOf(segments[3]).byteValue());
-
-        String port = Integer.toHexString(state.getPort());
-        stream.writeByte(Integer.valueOf(port.substring(2, 4), 16).byteValue());
-        stream.writeByte(Integer.valueOf(port.substring(0, 2), 16).byteValue());
+        stream.writeShort(Short.reverseBytes((short) state.getPort()));
     }
 
 

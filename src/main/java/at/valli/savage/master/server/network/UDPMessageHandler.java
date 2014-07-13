@@ -5,8 +5,10 @@ import at.valli.savage.master.server.state.ServerStateRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
 import java.net.DatagramPacket;
-import java.util.Arrays;
 
 /**
  * Created by valli on 13.07.2014.
@@ -15,8 +17,14 @@ final class UDPMessageHandler implements Runnable {
 
     private static final Logger LOG = LogManager.getLogger(UDPMessageHandler.class);
 
-    private static final int HEARTBEAT_CMD = 0xCA;
-    private static final int HEARTBEAT_SERVER_SHUTDOWN = 0xCB;
+    private static final int HEADER_0 = 0x9E;
+    private static final int HEADER_1 = 0x4C;
+    private static final int HEADER_2 = 0x23;
+    private static final int HEADER_3 = 0x00;
+    private static final int HEADER_4 = 0x00;
+
+    private static final int SERVER_HEARTBEAT = 0xCA;
+    private static final int SERVER_SHUTDOWN = 0xCB;
 
     private final ServerStateRegistry stateRegistry;
     private final DatagramPacket packet;
@@ -26,35 +34,53 @@ final class UDPMessageHandler implements Runnable {
         this.packet = packet;
     }
 
-    private static int toHexValue(byte b) {
-        return (b & 0xff);
-    }
-
     @Override
     public void run() {
         byte[] data = packet.getData();
-        if (data.length >= 13) {
-            if (toHexValue(data[5]) == HEARTBEAT_CMD) {
-                ServerState serverState = determineServerState(data);
-                LOG.info("Server Heartbeat received: {}", serverState);
-                stateRegistry.add(serverState);
-            } else if (toHexValue(data[5]) == HEARTBEAT_SERVER_SHUTDOWN) {
-                ServerState serverState = determineServerState(data);
-                stateRegistry.remove(serverState);
-                LOG.info("Server Shutdown received: {}", serverState);
+        DataInputStream stream = new DataInputStream(new ByteArrayInputStream(data));
+        try {
+            if (headerValid(stream)) {
+                int cmd = readCommand(stream);
+                if (SERVER_HEARTBEAT == cmd) {
+                    ServerState serverState = readServerState(stream);
+                    LOG.info("Server heartbeat received: {}", serverState);
+                    stateRegistry.add(serverState);
+                } else if (SERVER_SHUTDOWN == cmd) {
+                    ServerState serverState = readServerState(stream);
+                    stateRegistry.remove(serverState);
+                    LOG.info("Server shutdown received: {}", serverState);
+                } else {
+                    LOG.warn("Unknown command received: 0x{}", Integer.toHexString(cmd));
+                }
             } else {
-                LOG.warn("Unknown message received: {}", Arrays.toString(data));
+                LOG.warn("Header invalid, discarding message.");
             }
-        } else {
-            LOG.warn("Malformed message received: {}", Arrays.toString(data));
+        } catch (IOException e) {
+            LOG.error(e.getMessage(), e);
         }
     }
 
-    private ServerState determineServerState(byte[] data) {
-        int version = data[6];
-        String ip = toHexValue(data[7]) + "." + toHexValue(data[8]) + "." + toHexValue(data[9]) + "." + toHexValue(data[10]);
-        int port = toHexValue(data[11]) + toHexValue(data[12]) * 256;
+    private int readCommand(DataInputStream stream) throws IOException {
+        return stream.readUnsignedByte();
+    }
 
+    private boolean headerValid(DataInputStream stream) throws IOException {
+        int header0 = stream.readUnsignedByte();
+        int header1 = stream.readUnsignedByte();
+        int header2 = stream.readUnsignedByte();
+        int header3 = stream.readUnsignedByte();
+        int header4 = stream.readUnsignedByte();
+        return HEADER_0 == header0 && HEADER_1 == header1 && HEADER_2 == header2 && HEADER_3 == header3 && header4 == HEADER_4;
+    }
+
+    private ServerState readServerState(DataInputStream stream) throws IOException {
+        int version = stream.readByte();
+        int ipSegment1 = stream.readUnsignedByte();
+        int ipSegment2 = stream.readUnsignedByte();
+        int ipSegment3 = stream.readUnsignedByte();
+        int ipSegment4 = stream.readUnsignedByte();
+        String ip = ipSegment1 + "." + ipSegment2 + "." + ipSegment3 + "." + ipSegment4;
+        int port = Short.reverseBytes((short) stream.readUnsignedShort());
         return new ServerState(version, ip, port);
     }
 }
