@@ -15,10 +15,9 @@ public final class ServerStateRegistry {
     private static final Logger LOG = LogManager.getLogger(ServerStateRegistry.class);
 
     private final Object LOCK = new Object();
+    private final Set<ServerState> states = new HashSet<>();
 
-    private Set<ServerState> states = new HashSet<>();
-
-    public void add(ServerState serverState) {
+    public void add(final ServerState serverState) {
         Validate.notNull(serverState, "serverState must not be null");
         synchronized (LOCK) {
             states.remove(serverState);
@@ -27,7 +26,7 @@ public final class ServerStateRegistry {
         }
     }
 
-    public void remove(ServerState serverState) {
+    public void remove(final ServerState serverState) {
         Validate.notNull(serverState, "serverState must not be null");
         synchronized (LOCK) {
             states.remove(serverState);

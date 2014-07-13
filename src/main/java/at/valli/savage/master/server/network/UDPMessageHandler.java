@@ -21,7 +21,7 @@ final class UDPMessageHandler implements Runnable {
     private final ServerStateRegistry stateRegistry;
     private final DatagramPacket packet;
 
-    UDPMessageHandler(ServerStateRegistry stateRegistry, DatagramPacket packet) {
+    UDPMessageHandler(final ServerStateRegistry stateRegistry, final DatagramPacket packet) {
         this.stateRegistry = stateRegistry;
         this.packet = packet;
     }

@@ -11,7 +11,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
@@ -49,9 +48,9 @@ final class FileStateWriter implements Runnable {
         }
     }
 
-    private Path writeDatFile(File tempFile, File datFile) throws IOException {
+    private void writeDatFile(File tempFile, File datFile) throws IOException {
         LOG.debug("Copying working copy {} to dat file {} ...", tempFile.getAbsoluteFile(), datFile.getAbsoluteFile());
-        return Files.copy(tempFile.toPath(), datFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(tempFile.toPath(), datFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
     }
 
     private void writeServerStates(final DataOutputStream stream, final Collection<ServerState> serverStates) throws IOException {

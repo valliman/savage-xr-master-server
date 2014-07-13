@@ -15,7 +15,7 @@ public final class FutureEvaluator extends Thread {
 
     private static final Logger LOG = LogManager.getLogger(FutureEvaluator.class);
 
-    private Future<?> future;
+    private final Future<?> future;
 
     public FutureEvaluator(final Future<?> future) {
         Validate.notNull(future, "future must not be null");

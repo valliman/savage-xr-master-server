@@ -20,7 +20,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class TCPHandlerThread extends Thread {
 
     private static final Logger LOG = LogManager.getLogger(TCPHandlerThread.class);
-    private static final int UDP_RECEIVE_BUFFER_SIZE = 1024;
     private static final BasicThreadFactory NAMED_THREAD_FACTORY = new BasicThreadFactory.Builder().namingPattern("TCPHandlerThread-%d").build();
 
     private final AtomicBoolean started = new AtomicBoolean();
@@ -57,7 +56,6 @@ public final class TCPHandlerThread extends Thread {
 
     @Override
     public void run() {
-        final byte[] buf = new byte[UDP_RECEIVE_BUFFER_SIZE];
         while (started.get()) {
             try {
                 LOG.debug("Waiting for data");
@@ -65,10 +63,10 @@ public final class TCPHandlerThread extends Thread {
                 LOG.debug("Received data from " + socket.getInetAddress().getHostAddress());
                 processNewRequest(message);
             } catch (IOException e) {
+                // exception when shutting down is catched
                 if (started.get()) {
                     LOG.error(e.getMessage(), e);
                 }
-                // exception when shutting down is catched
             }
 
         }

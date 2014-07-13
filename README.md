@@ -35,5 +35,5 @@ The server allows to configure some properties, listed below.
 Authors:
   valli
 
-Contributers:
+Contributors:
   Groentjuh

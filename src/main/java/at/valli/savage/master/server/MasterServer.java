@@ -26,7 +26,7 @@ public final class MasterServer {
     private TCPHandlerThread tcpHandler;
     private StateWriterThread datFileWriter;
 
-    public MasterServer(int port) {
+    public MasterServer(final int port) {
         Validate.inclusiveBetween(0, 65535, port, "invalid port provided");
         this.port = port;
     }
