@@ -36,10 +36,9 @@ final class UDPMessageHandler implements Runnable {
 
     @Override
     public void run() {
-        byte[] data = packet.getData();
-        DataInputStream stream = new DataInputStream(new ByteArrayInputStream(data));
+        DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.getData()));
         try {
-            if (headerValid(stream)) {
+            if (isHeaderValid(stream)) {
                 int cmd = readCommand(stream);
                 if (SERVER_HEARTBEAT == cmd) {
                     ServerState serverState = readServerState(stream);
@@ -53,7 +52,7 @@ final class UDPMessageHandler implements Runnable {
                     LOG.warn("Unknown command received: 0x{}", Integer.toHexString(cmd));
                 }
             } else {
-                LOG.warn("Header invalid, discarding message.");
+                LOG.info("Header invalid, discarding message.");
             }
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
@@ -64,13 +63,13 @@ final class UDPMessageHandler implements Runnable {
         return stream.readUnsignedByte();
     }
 
-    private boolean headerValid(DataInputStream stream) throws IOException {
+    private boolean isHeaderValid(DataInputStream stream) throws IOException {
         int header0 = stream.readUnsignedByte();
         int header1 = stream.readUnsignedByte();
         int header2 = stream.readUnsignedByte();
         int header3 = stream.readUnsignedByte();
         int header4 = stream.readUnsignedByte();
-        return HEADER_0 == header0 && HEADER_1 == header1 && HEADER_2 == header2 && HEADER_3 == header3 && header4 == HEADER_4;
+        return HEADER_0 == header0 && HEADER_1 == header1 && HEADER_2 == header2 && HEADER_3 == header3 && HEADER_4 == header4;
     }
 
     private ServerState readServerState(DataInputStream stream) throws IOException {
