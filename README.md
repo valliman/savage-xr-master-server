@@ -18,16 +18,16 @@ Simply download the [savage-master-server-1.0.5.jar](https://github.com/valliman
 ## Configuration
 The server allows to configure some properties, which are listed below:
 
-> listening port of the master server, default: 11236
+> the listening port of the master server, default: 11236
 * `listening.port = 11236` 
 
-> path and name of the dat file to be written, default: ./gamelist_full.dat
+> the path and name of the dat file to be written, default: ./gamelist_full.dat
 * `dat.file = ./gamelist_full.dat` 
 
-> interval in seconds the dat file is re-written, default: 60
+> the interval in seconds the dat file is re-written, default: 60
 * `dat.file.writing.interval.seconds = 60` 
 
-> time in seconds a server is kept in the server list without sending a heartbeat, default: 90
+> the time in seconds a server is kept in the server list without sending a heartbeat, default: 90
 * `server.state.max.storage.seconds = 90` 
 
 
