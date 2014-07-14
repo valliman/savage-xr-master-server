@@ -74,11 +74,11 @@ final class UDPMessageHandler implements Runnable {
 
     private ServerState readServerState(DataInputStream stream) throws IOException {
         int version = stream.readByte();
-        int ipSegment1 = stream.readUnsignedByte();
-        int ipSegment2 = stream.readUnsignedByte();
-        int ipSegment3 = stream.readUnsignedByte();
-        int ipSegment4 = stream.readUnsignedByte();
-        String ip = ipSegment1 + "." + ipSegment2 + "." + ipSegment3 + "." + ipSegment4;
+        int octet0 = stream.readUnsignedByte();
+        int octet1 = stream.readUnsignedByte();
+        int octet2 = stream.readUnsignedByte();
+        int octet3 = stream.readUnsignedByte();
+        String ip = octet0 + "." + octet1 + "." + octet2 + "." + octet3;
         int port = Short.reverseBytes((short) stream.readUnsignedShort());
         return new ServerState(version, ip, port);
     }

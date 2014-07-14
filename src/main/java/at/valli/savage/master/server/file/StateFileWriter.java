@@ -18,16 +18,16 @@ import java.util.concurrent.TimeUnit;
 /**
  * Created by valli on 13.07.2014.
  */
-final class FileStateWriter implements Runnable {
+final class StateFileWriter implements Runnable {
 
-    private static final Logger LOG = LogManager.getLogger(FileStateWriter.class);
+    private static final Logger LOG = LogManager.getLogger(StateFileWriter.class);
     private static final String DAT_FILE_NAME = System.getProperty("dat.file", "gamelist_full.dat");
     private static final String TEMP_FILE_NAME = "serverstates.temp";
     private static final long SERVER_STATE_TIMEOUT = TimeUnit.SECONDS.toNanos(Long.getLong("server.state.max.storage.seconds", 90L));
 
     private final ServerStateRegistry stateRegistry;
 
-    FileStateWriter(final ServerStateRegistry stateRegistry) {
+    StateFileWriter(final ServerStateRegistry stateRegistry) {
         Validate.notNull(stateRegistry, "stateRegistry must not be null");
         this.stateRegistry = stateRegistry;
     }
@@ -79,11 +79,11 @@ final class FileStateWriter implements Runnable {
 
     private void writeServerState(final DataOutputStream stream, final ServerState state) throws IOException {
         LOG.debug("Writing dat file server state {}  ...", state);
-        String[] segments = state.getIp().split("\\.");
-        stream.writeByte(Integer.valueOf(segments[0]).byteValue());
-        stream.writeByte(Integer.valueOf(segments[1]).byteValue());
-        stream.writeByte(Integer.valueOf(segments[2]).byteValue());
-        stream.writeByte(Integer.valueOf(segments[3]).byteValue());
+        String[] octets = state.getIp().split("\\.");
+        stream.writeByte(Integer.valueOf(octets[0]).byteValue());
+        stream.writeByte(Integer.valueOf(octets[1]).byteValue());
+        stream.writeByte(Integer.valueOf(octets[2]).byteValue());
+        stream.writeByte(Integer.valueOf(octets[3]).byteValue());
         stream.writeShort(Short.reverseBytes((short) state.getPort()));
     }
 

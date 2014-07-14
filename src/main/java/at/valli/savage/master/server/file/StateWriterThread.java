@@ -36,7 +36,7 @@ public final class StateWriterThread extends Thread {
 
     @Override
     public void run() {
-        task = executorService.scheduleAtFixedRate(new FileStateWriter(stateRegistry), FILE_WRITING_INTERVAL_SECONDS, FILE_WRITING_INTERVAL_SECONDS, TimeUnit.SECONDS);
+        task = executorService.scheduleAtFixedRate(new StateFileWriter(stateRegistry), FILE_WRITING_INTERVAL_SECONDS, FILE_WRITING_INTERVAL_SECONDS, TimeUnit.SECONDS);
         new FutureEvaluator(task).start();
     }
 
