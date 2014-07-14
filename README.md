@@ -1,9 +1,7 @@
 ![Savage XR](http://savagexr.com/media/savagexr_logo_600.png)
 Savage XR Master Server
 ====================
-The repository hosts the code of the Savage XR Master Server. The whole responsibility of the master server is it to 
-generate a server list for Savage XR clients. To do that the master server stores state information provided by 
-Savage XR gaming servers via heart-beating.
+The repository hosts the code and the binaries of the Savage XR Master Server. 
 
 ## About Savage XR
 Savage XR, the successor of the 2003 award winning PC game [Savage: The Battle for Newerth](http://www.savagexr.com/savage-the-battle-for-newerth-download.html), 
@@ -12,6 +10,10 @@ complex and addicting experience. Aim of the game is to destroy the enemy base. 
 Visit [savagexr.com](http://savagexr.com) for more information.
 
 ## About Savage XR Master Server
+The whole responsibility of the master server is it to 
+generate a server list for Savage XR clients. To do that the master server stores state information provided by 
+Savage XR gaming servers via heart-beating.
+
 ### Requirements
 
 > Java 1.7
