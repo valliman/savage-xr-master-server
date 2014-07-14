@@ -5,17 +5,24 @@ The repository hosts the code of the Savage XR Master Server. The whole responsi
 generate a server list for Savage XR clients. To do that the master server stores state information provided by 
 Savage XR gaming servers via heart-beating.
 
-## Requirements
+## About Savage XR
+Savage XR, the successor of the 2003 award winning PC game [Savage: The Battle for Newerth](http://www.savagexr.com/savage-the-battle-for-newerth-download.html), 
+takes the best of the Real-time Strategy, First-person Shooter and Third-person Action genres and blends it into a cohesive, 
+complex and addicting experience. Aim of the game is to destroy the enemy base. Savage XR is entirely free and non-profit! 
+Visit [savagexr.com](http://savagexr.com) for more information.
+
+## About Savage XR Master Server
+### Requirements
 
 > Java 1.7
 
-## Getting Started
+### Getting Started
 Simply download the [savage-master-server-1.0.5.jar](https://github.com/valliman/savage-master-server/releases/download/1.0.5/savage-master-server-1.0.5.jar)
 
 > Open a command shell and start the server with the following command:
 * `java -jar savage-master-server-1.0.5.jar`
 
-## Configuration
+### Configuration
 The server allows to configure some properties, which are listed below:
 
 > the listening port of the master server, default: 11236
@@ -30,8 +37,7 @@ The server allows to configure some properties, which are listed below:
 > the time in seconds a server is kept in the server list without sending a heartbeat, default: 90
 * `server.state.max.storage.seconds = 90` 
 
-
-## The team
+## Team
 Authors:
   valli
 
