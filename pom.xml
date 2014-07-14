@@ -48,6 +48,8 @@
     </dependencyManagement>
 
     <build>
+        <defaultGoal>package</defaultGoal>
+        <finalName>savage-master-server-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
