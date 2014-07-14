@@ -48,6 +48,12 @@ final class TCPMessageHandler implements Runnable {
             LOG.error(e.getMessage(), e);
         } catch (InterruptedException e) {
             // do nothing when interrupted
+        } finally {
+            try {
+                socket.close();
+            } catch (IOException e) {
+                // nothing to do
+            }
         }
     }
 

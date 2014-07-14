@@ -33,7 +33,8 @@ public final class MasterServer {
 
     public void start() {
         try {
-            LOG.info("MasterServer starting... Listening at UDP {}", port);
+            LOG.info("MasterServer starting...");
+            LOG.info("Listening at port {}.", port);
             DatagramSocket udpSocket = new DatagramSocket(port);
             ServerSocket tcpSocket = new ServerSocket(port);
             udpHandler = new UDPHandlerThread(stateRegistry, udpSocket);
