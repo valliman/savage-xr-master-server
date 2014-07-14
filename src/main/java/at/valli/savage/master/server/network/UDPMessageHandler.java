@@ -36,8 +36,7 @@ final class UDPMessageHandler implements Runnable {
 
     @Override
     public void run() {
-        DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.getData()));
-        try {
+        try (DataInputStream stream = new DataInputStream(new ByteArrayInputStream(packet.getData()))) {
             if (isHeaderValid(stream)) {
                 int cmd = readCommand(stream);
                 if (SERVER_HEARTBEAT == cmd) {

@@ -27,7 +27,7 @@ public final class MasterServer {
     private StateWriterThread datFileWriter;
 
     public MasterServer(final int port) {
-        Validate.exclusiveBetween(0, 65536, port, "invalid port provided");
+        Validate.inclusiveBetween(0, 65535, port, "invalid port provided");
         this.port = port;
     }
 

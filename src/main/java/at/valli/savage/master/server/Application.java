@@ -17,6 +17,7 @@ public class Application {
         MasterServer masterServer = new MasterServer(UDP_LISTENING_PORT);
         masterServer.start();
         try {
+            //noinspection ResultOfMethodCallIgnored
             System.in.read();
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);

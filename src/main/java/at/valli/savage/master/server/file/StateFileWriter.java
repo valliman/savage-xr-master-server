@@ -65,7 +65,7 @@ final class StateFileWriter implements Runnable {
     }
 
     private boolean serverTimeout(ServerState serverState) {
-        return (System.nanoTime() - serverState.getTime()) > SERVER_STATE_TIMEOUT;
+        return Math.abs(System.nanoTime() - serverState.getTime()) > SERVER_STATE_TIMEOUT;
     }
 
     private void writeHeader(final DataOutputStream stream) throws IOException {
