@@ -24,7 +24,7 @@ The server allows to configure some properties, which are listed below:
 > path and name of the dat file to be written, default: ./gamelist_full.dat
 * `dat.file = ./gamelist_full.dat` 
 
-> the interval in seconds the dat file is re-written, default: 60
+> interval in seconds the dat file is re-written, default: 60
 * `dat.file.writing.interval.seconds = 60` 
 
 > time in seconds a server is kept in the server list without sending a heartbeat, default: 90
