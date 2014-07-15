@@ -1,9 +1,9 @@
 package at.valli.savage.master.server;
 
-import at.valli.savage.master.server.file.StateWriterThread;
 import at.valli.savage.master.server.network.TCPHandlerThread;
 import at.valli.savage.master.server.network.UDPHandlerThread;
 import at.valli.savage.master.server.state.ServerStateRegistry;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,7 +24,6 @@ public final class MasterServer {
 
     private UDPHandlerThread udpHandler;
     private TCPHandlerThread tcpHandler;
-    private StateWriterThread datFileWriter;
 
     public MasterServer(final int port) {
         Validate.inclusiveBetween(0, 65535, port, "invalid port provided");
@@ -41,8 +40,9 @@ public final class MasterServer {
             udpHandler.startHandling();
             tcpHandler = new TCPHandlerThread(tcpSocket);
             tcpHandler.startHandling();
-            datFileWriter = new StateWriterThread(stateRegistry);
-            datFileWriter.startWriting();
+
+            stateRegistry.startServices();
+            
             LOG.info("MasterServer started.");
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
@@ -53,7 +53,7 @@ public final class MasterServer {
         LOG.info("MasterServer stopping ...");
         udpHandler.stopHandling();
         tcpHandler.stopHandling();
-        datFileWriter.stopWriting();
+        stateRegistry.stopServices();
         LOG.info("MasterServer stopped.");
     }
 

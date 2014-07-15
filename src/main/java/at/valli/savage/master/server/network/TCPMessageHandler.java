@@ -1,5 +1,6 @@
 package at.valli.savage.master.server.network;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,9 +41,12 @@ final class TCPMessageHandler implements Runnable {
 
             String message = in.readLine();
             String[] tokens = message.split(" ");
-            if (tokens.length == 2 && SERVER_FIREWALL_TEST.equals(tokens[0])) {
+            if (SERVER_FIREWALL_TEST.equals(tokens[0])) {
                 host = closeable.getInetAddress().getHostAddress();
-                port = Integer.valueOf(tokens[1]);
+                if( tokens.length >= 2 && isPortValid(Integer.valueOf(tokens[1]))) {
+                	LOG.info("Request to test port {} from {} received.", host, port);
+                    runPortTest(host, Integer.valueOf(tokens[1]));  //ya, I parsed it twice. Wanna make sumfin of it bruv?
+                }
             } else {
                 LOG.warn("Unknown message received: {}", message);
             }
@@ -50,6 +54,8 @@ final class TCPMessageHandler implements Runnable {
             LOG.error(e.getMessage(), e);
         } catch (InterruptedException e) {
             LOG.debug("Thread interrupted.", e);
+        } catch (IllegalArgumentException e) {
+        	LOG.error(e.getMessage(), e);
         }
 
         if (isPortValid(port) && host != null) {
@@ -93,7 +99,7 @@ final class TCPMessageHandler implements Runnable {
 
             String message = in.readLine();
             String[] tokens = message.split(" ");
-            if (tokens.length == 2 && SV_HI.equals(tokens[0])) {
+            if (tokens.length >= 2 && SV_HI.equals(tokens[0])) {
                 LOG.debug("Server cookie received.");
                 cookie = tokens[1];
             } else {
@@ -114,7 +120,10 @@ final class TCPMessageHandler implements Runnable {
         }
     }
 
-    private boolean isPortValid(int port) {
-        return port >= 0 && port <= 65535;
+    private boolean isPortValid(int port) throws IllegalArgumentException {
+    	Validate.inclusiveBetween(1024, 65535, port, "Not a valid port");
+    	//ports below 1024 are reserved usually for services run by the system.
+    	//someone asking for a port below that might be up to something devious
+        return true;
     }
 }

@@ -1,5 +1,9 @@
 package at.valli.savage.master.server.state;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
+
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -12,14 +16,14 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public final class ServerState {
 
     private final int version;
-    private final String ip;
+    private final byte[] ip;
     private final int port;
     private final long time;
 
-    public ServerState(final int version, final String ip, final int port) {
+    public ServerState(final int version, final byte[] ip, final int port) {
         Validate.notNull(ip, "ip must not be null");
         this.version = version;
-        this.ip = ip;
+        this.ip = Arrays.copyOf(ip, 4);
         this.port = port;
         this.time = System.nanoTime();
     }
@@ -33,13 +37,18 @@ public final class ServerState {
     }
 
     public String getIp() {
-        return ip;
+        return ""+ip[0]+"."+ip[1]+"."+ip[2]+"."+ip[3];
     }
 
     public int getPort() {
         return port;
     }
 
+    public void serialize(final DataOutputStream stream) throws IOException {
+    	stream.write(ip);
+        stream.writeShort(Short.reverseBytes((short) port));
+    }
+    
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
@@ -58,7 +67,7 @@ public final class ServerState {
         }
         ServerState rhs = (ServerState) obj;
         return new EqualsBuilder()
-                .append(ip, rhs.ip)
+                .append(getIp(), rhs.getIp())
                 .append(port, rhs.port)
                 .append(version, rhs.version)
                 .isEquals();
@@ -66,6 +75,6 @@ public final class ServerState {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder().append(ip).append(port).append(version).toHashCode();
+        return new HashCodeBuilder().append(getIp()).append(port).append(version).toHashCode();
     }
 }
