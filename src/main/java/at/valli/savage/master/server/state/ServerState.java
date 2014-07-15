@@ -1,14 +1,12 @@
 package at.valli.savage.master.server.state;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.util.Arrays;
-
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
+import java.util.Arrays;
 
 /**
  * Created by valli on 13.07.2014.
@@ -16,16 +14,22 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 public final class ServerState {
 
     private final int version;
-    private final byte[] ip;
-    private final int port;
+    private final byte[] rawIp;
+    private final String ip;
+    private final short port;
     private final long time;
 
-    public ServerState(final int version, final byte[] ip, final int port) {
-        Validate.notNull(ip, "ip must not be null");
+    public ServerState(final int version, final byte[] rawIp, final short port) {
+        Validate.notNull(rawIp, "rawIp must not be null");
         this.version = version;
-        this.ip = Arrays.copyOf(ip, 4);
+        this.rawIp = Arrays.copyOf(rawIp, rawIp.length);
+        this.ip = toIp(rawIp);
         this.port = port;
         this.time = System.nanoTime();
+    }
+
+    private static String toIp(byte[] rawIp) {
+        return Byte.toUnsignedInt(rawIp[0]) + "." + Byte.toUnsignedInt(rawIp[1]) + "." + Byte.toUnsignedInt(rawIp[2]) + "." + Byte.toUnsignedInt(rawIp[3]);
     }
 
     public long getTime() {
@@ -36,22 +40,17 @@ public final class ServerState {
         return version;
     }
 
-    public String getIp() {
-        return ""+ip[0]+"."+ip[1]+"."+ip[2]+"."+ip[3];
+    public byte[] getRawIp() {
+        return rawIp;
     }
 
-    public int getPort() {
+    public short getPort() {
         return port;
     }
 
-    public void serialize(final DataOutputStream stream) throws IOException {
-    	stream.write(ip);
-        stream.writeShort(Short.reverseBytes((short) port));
-    }
-    
     @Override
     public String toString() {
-        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append(version).append(ip).append(port).toString();
     }
 
     @Override
@@ -67,7 +66,7 @@ public final class ServerState {
         }
         ServerState rhs = (ServerState) obj;
         return new EqualsBuilder()
-                .append(getIp(), rhs.getIp())
+                .append(getRawIp(), rhs.getRawIp())
                 .append(port, rhs.port)
                 .append(version, rhs.version)
                 .isEquals();
@@ -75,6 +74,6 @@ public final class ServerState {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder().append(getIp()).append(port).append(version).toHashCode();
+        return new HashCodeBuilder().append(getRawIp()).append(port).append(version).toHashCode();
     }
 }

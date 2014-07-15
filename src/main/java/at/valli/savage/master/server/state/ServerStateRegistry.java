@@ -1,12 +1,11 @@
 package at.valli.savage.master.server.state;
 
+import at.valli.savage.master.server.core.Service;
+import at.valli.savage.master.server.util.FutureEvaluator;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import at.valli.savage.master.server.file.StateFileWriter;
-import at.valli.savage.master.server.util.FutureEvaluator;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -19,26 +18,33 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Created by valli on 13.07.2014.
  */
-public final class ServerStateRegistry {
+public final class ServerStateRegistry implements Service {
 
     private static final Logger LOG = LogManager.getLogger(ServerStateRegistry.class);
-    private static final BasicThreadFactory NAMED_THREAD_FACTORY = new BasicThreadFactory.Builder().namingPattern("RegistryService-%d").build();
-    private static final long FILE_WRITING_INTERVAL_SECONDS = Long.getLong("dat.file.writing.interval.seconds", 60L);
-    private static final long SERVER_STATE_TIMEOUT = Long.getLong("server.state.max.storage.seconds", 90L);
-    
-    private ScheduledExecutorService executorService;
-    private ScheduledFuture<?> writeTask, cleanTask;
-    
+    private static final BasicThreadFactory NAMED_THREAD_FACTORY = new BasicThreadFactory.Builder().namingPattern("RegistryCleanerTask-%d").build();
+    private static final long SERVER_STATE_TIMEOUT = TimeUnit.SECONDS.toNanos(Long.getLong("server.state.max.storage.seconds", 90L));
     private final Object LOCK = new Object();
+    private final AtomicBoolean started = new AtomicBoolean();
     private final Set<ServerState> states = new HashSet<>();
-    private final AtomicBoolean changeFlag = new AtomicBoolean();
-    
+    private final ServerStatesUpdateListener updateListener;
+    private ScheduledExecutorService executorService;
+    private ScheduledFuture<?> cleanTask;
+
+    public ServerStateRegistry(final ServerStatesUpdateListener updateListener) {
+        Validate.notNull(updateListener);
+        this.updateListener = updateListener;
+    }
+
+    private static boolean serverTimeout(final ServerState serverState) {
+        return Math.abs(System.nanoTime() - serverState.getTime()) > SERVER_STATE_TIMEOUT;
+    }
+
     public void add(final ServerState serverState) {
         Validate.notNull(serverState, "serverState must not be null");
         synchronized (LOCK) {
             states.remove(serverState);
             states.add(serverState);
-            changeFlag.set(true);
+            notifyListener();
             LOG.info("Current server registry state {}", states);
         }
     }
@@ -47,48 +53,57 @@ public final class ServerStateRegistry {
         Validate.notNull(serverState, "serverState must not be null");
         synchronized (LOCK) {
             states.remove(serverState);
-            changeFlag.set(true);
+            notifyListener();
             LOG.info("Current server registry state {}", states);
         }
     }
 
-    public void removeIfOlder(long cullTime) {
-    	synchronized (LOCK) {
-    		for (ServerState serverState : states) {
-    			if(cullTime >= serverState.getTime()) {
-    				states.remove(serverState);
-    	            changeFlag.set(true);
-    			}
-    		}
-    	}
-    }
-    
-    public Set<ServerState> getServerStates() {
-        synchronized (LOCK) {
-        	changeFlag.set(false);
-            return new HashSet<>(states);
-        }
-    }
-    
-    public boolean isChanged() {
-    	return changeFlag.get();
-    }
-    
-    public void startServices() {
-    	LOG.info("Starting registry services ...");
-    	changeFlag.set(true);
-    	executorService = Executors.newScheduledThreadPool(2, NAMED_THREAD_FACTORY);
-        
-    	writeTask = executorService.scheduleAtFixedRate(new StateFileWriter(this), FILE_WRITING_INTERVAL_SECONDS, FILE_WRITING_INTERVAL_SECONDS, TimeUnit.SECONDS);
-        new FutureEvaluator(writeTask).start();
-        cleanTask = executorService.scheduleAtFixedRate(new RegistryCleaner(this), SERVER_STATE_TIMEOUT, SERVER_STATE_TIMEOUT, TimeUnit.SECONDS);
-        new FutureEvaluator(cleanTask).start();
+    private void notifyListener() {
+        updateListener.stateUpdated(new HashSet<>(states));
     }
 
-    public void stopServices() {
-        LOG.info("Stopping registry services ...");
-        writeTask.cancel(true);
+    @Override
+    public void startup() {
+        if (started.get()) {
+            throw new IllegalStateException("ServerStateRegistry already started ...");
+        } else {
+            LOG.info("Starting registry service ...");
+            executorService = Executors.newScheduledThreadPool(1, NAMED_THREAD_FACTORY);
+            cleanTask = executorService.scheduleAtFixedRate(new RegistryCleanerTask(), SERVER_STATE_TIMEOUT, SERVER_STATE_TIMEOUT, TimeUnit.SECONDS);
+            new FutureEvaluator(cleanTask).start();
+            started.set(true);
+        }
+    }
+
+    @Override
+    public void shutdown() {
+        LOG.info("Stopping registry service ...");
         cleanTask.cancel(true);
         executorService.shutdown();
+        started.set(false);
+    }
+
+    private class RegistryCleanerTask implements Runnable {
+
+        @Override
+        public void run() {
+            LOG.debug("Cleaning registry ...");
+
+            synchronized (LOCK) {
+                Set<ServerState> statesToCheck = new HashSet<>(states);
+                boolean notifyListener = false;
+                for (ServerState state : statesToCheck) {
+                    if (serverTimeout(state)) {
+                        states.remove(state);
+                        notifyListener = true;
+                    }
+                }
+                if (notifyListener) {
+                    notifyListener();
+                }
+            }
+
+            LOG.debug("Registry cleaned ...");
+        }
     }
 }

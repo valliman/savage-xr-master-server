@@ -1,5 +1,6 @@
 package at.valli.savage.master.server;
 
+import at.valli.savage.master.server.core.MasterServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,13 +16,13 @@ public class Application {
 
     public static void main(final String[] args) {
         MasterServer masterServer = new MasterServer(UDP_LISTENING_PORT);
-        masterServer.start();
+        masterServer.startup();
         try {
             //noinspection ResultOfMethodCallIgnored
             System.in.read();
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
         }
-        masterServer.stop();
+        masterServer.shutdown();
     }
 }

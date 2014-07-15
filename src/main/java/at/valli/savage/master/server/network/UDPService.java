@@ -1,5 +1,7 @@
 package at.valli.savage.master.server.network;
 
+import at.valli.savage.master.server.core.Service;
+import at.valli.savage.master.server.core.ServiceException;
 import at.valli.savage.master.server.state.ServerStateRegistry;
 import at.valli.savage.master.server.util.FutureEvaluator;
 import org.apache.commons.lang3.Validate;
@@ -10,6 +12,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.SocketException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -18,38 +21,47 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Created by valli on 13.07.2014.
  */
-public final class UDPHandlerThread extends Thread {
+public final class UDPService extends Thread implements Service {
 
-    private static final Logger LOG = LogManager.getLogger(UDPHandlerThread.class);
+    private static final Logger LOG = LogManager.getLogger(UDPService.class);
     private static final int UDP_RECEIVE_BUFFER_SIZE = 1024;
-    private static final BasicThreadFactory NAMED_THREAD_FACTORY = new BasicThreadFactory.Builder().namingPattern("UDPHandlerThread-%d").build();
+    private static final BasicThreadFactory NAMED_THREAD_FACTORY = new BasicThreadFactory.Builder().namingPattern("UDPMessageHandler-%d").build();
 
     private final AtomicBoolean started = new AtomicBoolean();
-    private final DatagramSocket socket;
     private final ServerStateRegistry stateRegistry;
+    private final int port;
 
     private ExecutorService executorService;
+    private DatagramSocket socket;
 
-    public UDPHandlerThread(final ServerStateRegistry stateRegistry, final DatagramSocket socket) {
+    public UDPService(final ServerStateRegistry stateRegistry, final int port) {
         Validate.notNull(stateRegistry, "stateRegistry must not be null");
-        Validate.notNull(socket, "socket must not be null");
         this.stateRegistry = stateRegistry;
-        this.socket = socket;
+        this.port = port;
+        setName("UDPService");
     }
 
-    public void startHandling() {
+    @Override
+    public void startup() throws ServiceException {
         if (started.get()) {
-            throw new IllegalStateException("UDPHandlerThread already started ...");
+            throw new IllegalStateException("UDPService already started ...");
         } else {
-            LOG.debug("Starting UDPHandlerThread ...");
-            started.set(true);
-            executorService = Executors.newCachedThreadPool(NAMED_THREAD_FACTORY);
-            this.start();
+            LOG.debug("Starting UDPService ...");
+            try {
+                executorService = Executors.newCachedThreadPool(NAMED_THREAD_FACTORY);
+                socket = new DatagramSocket(port);
+                LOG.info("Listening at UDP port {}.", port);
+                started.set(true);
+                this.start();
+            } catch (SocketException e) {
+                throw new ServiceException(e.getMessage(), e);
+            }
         }
     }
 
-    public void stopHandling() {
-        LOG.debug("Stopping UDPHandlerThread ...");
+    @Override
+    public void shutdown() {
+        LOG.debug("Stopping UDPService ...");
         started.set(false);
         executorService.shutdown();
         socket.close();
@@ -68,7 +80,7 @@ public final class UDPHandlerThread extends Thread {
                 if (started.get()) {
                     LOG.error(e.getMessage(), e);
                 }
-                // exception when shutting down is catched
+                // exception when shutting down is caught
             }
             processNewRequest(packet);
         }
