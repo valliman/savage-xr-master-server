@@ -32,7 +32,8 @@ public final class StateFileWriter implements Service, ServerStatesUpdateListene
     private static final byte[] HEADER = {0x7E, 0x41, 0x03, 0x00, 0x00};
     private static final BasicThreadFactory NAMED_THREAD_FACTORY = new BasicThreadFactory.Builder().namingPattern("FileWriterTask-%d").build();
 
-    private final AtomicBoolean stateChanged = new AtomicBoolean();
+    private final AtomicBoolean started = new AtomicBoolean();
+    private final AtomicBoolean stateChanged = new AtomicBoolean(true);
     private final AtomicReference<Set<ServerState>> state = new AtomicReference<Set<ServerState>>(new HashSet<ServerState>());
 
     private ScheduledExecutorService executorService;
@@ -60,10 +61,15 @@ public final class StateFileWriter implements Service, ServerStatesUpdateListene
 
     @Override
     public void startup() {
-        LOG.info("Starting registry services ...");
-        executorService = Executors.newScheduledThreadPool(1, NAMED_THREAD_FACTORY);
-        writeTask = executorService.scheduleAtFixedRate(new StateFileWriterTask(), FILE_WRITING_INTERVAL_SECONDS, FILE_WRITING_INTERVAL_SECONDS, TimeUnit.SECONDS);
-        new FutureEvaluator(writeTask).start();
+        if (started.get()) {
+            throw new IllegalStateException("TCPService already started ...");
+        } else {
+            LOG.info("Starting registry services ...");
+            executorService = Executors.newScheduledThreadPool(1, NAMED_THREAD_FACTORY);
+            writeTask = executorService.scheduleAtFixedRate(new StateFileWriterTask(), 0L, FILE_WRITING_INTERVAL_SECONDS, TimeUnit.SECONDS);
+            new FutureEvaluator(writeTask).start();
+            started.set(true);
+        }
     }
 
     @Override
@@ -71,13 +77,14 @@ public final class StateFileWriter implements Service, ServerStatesUpdateListene
         LOG.info("Stopping registry services ...");
         writeTask.cancel(true);
         executorService.shutdown();
+        started.set(false);
     }
 
     private class StateFileWriterTask implements Runnable {
 
         @Override
         public void run() {
-            if (stateChanged.get()) {
+            if (stateChanged.compareAndSet(true, false)) {
                 LOG.debug("Generating dat file ...");
                 File datFile = new File(DAT_FILE_NAME);
                 Set<ServerState> serverStates = state.get();
