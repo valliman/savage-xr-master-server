@@ -22,7 +22,8 @@ public final class ServerStateRegistry implements Service {
 
     private static final Logger LOG = LogManager.getLogger(ServerStateRegistry.class);
     private static final BasicThreadFactory NAMED_THREAD_FACTORY = new BasicThreadFactory.Builder().namingPattern("RegistryCleanerTask-%d").build();
-    private static final long SERVER_STATE_TIMEOUT = TimeUnit.SECONDS.toNanos(Long.getLong("server.state.max.storage.seconds", 90L));
+    private static final long SERVER_STATE_TIMEOUT_NANOS = TimeUnit.SECONDS.toNanos(Long.getLong("server.state.max.storage.seconds", 90L));
+    private static final long EXPIRY_CHECKER_INTERVAL_SECONDS = 45L;
     private final Object LOCK = new Object();
     private final AtomicBoolean started = new AtomicBoolean();
     private final Set<ServerState> states = new HashSet<>();
@@ -36,15 +37,22 @@ public final class ServerStateRegistry implements Service {
     }
 
     private static boolean serverTimeout(final ServerState serverState) {
-        return Math.abs(System.nanoTime() - serverState.getTime()) > SERVER_STATE_TIMEOUT;
+        return Math.abs(System.nanoTime() - serverState.getTime()) > SERVER_STATE_TIMEOUT_NANOS;
     }
 
     public void add(final ServerState serverState) {
         Validate.notNull(serverState, "serverState must not be null");
         synchronized (LOCK) {
-            states.remove(serverState);
+            boolean notify = false;
+            if (states.contains(serverState)) {
+                states.remove(serverState);
+            } else {
+                notify = true;
+            }
             states.add(serverState);
-            notifyListener();
+            if (notify) {
+                notifyListener();
+            }
             LOG.info("Current server registry state {}", states);
         }
     }
@@ -69,7 +77,7 @@ public final class ServerStateRegistry implements Service {
         } else {
             LOG.info("Starting registry service ...");
             executorService = Executors.newScheduledThreadPool(1, NAMED_THREAD_FACTORY);
-            cleanTask = executorService.scheduleAtFixedRate(new RegistryCleanerTask(), SERVER_STATE_TIMEOUT, SERVER_STATE_TIMEOUT, TimeUnit.SECONDS);
+            cleanTask = executorService.scheduleAtFixedRate(new RegistryCleanerTask(), EXPIRY_CHECKER_INTERVAL_SECONDS, EXPIRY_CHECKER_INTERVAL_SECONDS, TimeUnit.SECONDS);
             new FutureEvaluator(cleanTask).start();
             started.set(true);
         }
@@ -94,6 +102,7 @@ public final class ServerStateRegistry implements Service {
                 boolean notifyListener = false;
                 for (ServerState state : statesToCheck) {
                     if (serverTimeout(state)) {
+                        LOG.debug("Cleaning state {}.", state);
                         states.remove(state);
                         notifyListener = true;
                     }

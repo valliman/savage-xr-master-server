@@ -50,7 +50,7 @@ public final class ServerState {
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append(version).append(ip).append(port).toString();
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("version", version).append("host", ip).append("port", port).toString();
     }
 
     @Override
@@ -66,7 +66,7 @@ public final class ServerState {
         }
         ServerState rhs = (ServerState) obj;
         return new EqualsBuilder()
-                .append(getRawIp(), rhs.getRawIp())
+                .append(ip, rhs.ip)
                 .append(port, rhs.port)
                 .append(version, rhs.version)
                 .isEquals();
@@ -74,6 +74,6 @@ public final class ServerState {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder().append(getRawIp()).append(port).append(version).toHashCode();
+        return new HashCodeBuilder().append(ip).append(port).append(version).toHashCode();
     }
 }
