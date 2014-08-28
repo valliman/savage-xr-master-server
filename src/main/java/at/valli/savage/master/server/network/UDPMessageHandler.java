@@ -53,17 +53,17 @@ final class UDPMessageHandler implements Runnable {
         }
     }
 
-    private int readCommand(DataInputStream stream) throws IOException {
+    private int readCommand(final DataInputStream stream) throws IOException {
         return stream.readUnsignedByte();
     }
 
-    private boolean isHeaderValid(DataInputStream stream) throws IOException {
+    private boolean isHeaderValid(final DataInputStream stream) throws IOException {
         byte[] head = new byte[5];
         stream.readFully(head, 0, 5);
         return Arrays.equals(HEADER, head);
     }
 
-    private ServerState readServerState(DataInputStream stream) throws IOException {
+    private ServerState readServerState(final DataInputStream stream) throws IOException {
         int version = stream.readByte();
         byte[] ip = new byte[4];
         stream.readFully(ip, 0, 4);
