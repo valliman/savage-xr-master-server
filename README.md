@@ -44,5 +44,5 @@ Authors:
   valli
 
 Contributors:
-  Groentjuh
+  Groentjuh,
   biggeruniverse
