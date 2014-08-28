@@ -17,9 +17,7 @@ import java.util.Arrays;
 final class UDPMessageHandler implements Runnable {
 
     private static final Logger LOG = LogManager.getLogger(UDPMessageHandler.class);
-
     private static final byte[] HEADER = {(byte) 0x9E, 0x4c, 0x23, 0x00, 0x00};
-
     private static final int SERVER_HEARTBEAT = 0xCA;
     private static final int SERVER_SHUTDOWN = 0xCB;
 
