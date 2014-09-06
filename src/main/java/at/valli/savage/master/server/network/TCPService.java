@@ -40,7 +40,7 @@ public final class TCPService extends Thread implements Service {
             throw new IllegalStateException("TCPService already started ...");
         } else {
             try {
-                LOG.debug("Starting TCPService ...");
+                LOG.info("Starting TCPService ...");
                 executorService = Executors.newCachedThreadPool(NAMED_THREAD_FACTORY);
                 socket = new ServerSocket(port);
                 LOG.info("Listening at TCP port {}.", port);
@@ -54,7 +54,7 @@ public final class TCPService extends Thread implements Service {
 
     @Override
     public void shutdown() {
-        LOG.debug("Stopping TCPService ...");
+        LOG.info("Stopping TCPService ...");
         started.set(false);
         executorService.shutdown();
         try {

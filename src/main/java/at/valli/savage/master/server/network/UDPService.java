@@ -46,7 +46,7 @@ public final class UDPService extends Thread implements Service {
         if (started.get()) {
             throw new IllegalStateException("UDPService already started ...");
         } else {
-            LOG.debug("Starting UDPService ...");
+            LOG.info("Starting UDPService ...");
             try {
                 executorService = Executors.newCachedThreadPool(NAMED_THREAD_FACTORY);
                 socket = new DatagramSocket(port);
@@ -61,7 +61,7 @@ public final class UDPService extends Thread implements Service {
 
     @Override
     public void shutdown() {
-        LOG.debug("Stopping UDPService ...");
+        LOG.info("Stopping UDPService ...");
         started.set(false);
         executorService.shutdown();
         socket.close();

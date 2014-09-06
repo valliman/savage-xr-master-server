@@ -12,10 +12,11 @@ import java.io.IOException;
 public class Application {
 
     private static final Logger LOG = LogManager.getLogger(Application.class);
-    private static final int UDP_LISTENING_PORT = Integer.getInteger("listening.port", 11236);
+    private static final int LISTENING_PORT = Integer.getInteger("listening.port", 11236);
+    private static final int WEBSOCKET_PORT = Integer.getInteger("websocket.port", 8080);
 
     public static void main(final String[] args) {
-        MasterServer masterServer = new MasterServer(UDP_LISTENING_PORT);
+        MasterServer masterServer = new MasterServer(LISTENING_PORT, WEBSOCKET_PORT);
         masterServer.startup();
         try {
             //noinspection ResultOfMethodCallIgnored
