@@ -48,7 +48,7 @@ public class StateSessionWriter implements ServerStatesUpdateListener, SessionLi
     private void sendState(Session session) {
         if (session.isOpen()) {
             String msg = gson.toJson(state.get());
-            LOG.debug("sendState {} to session {}", msg, state);
+            LOG.debug("sendState {} to session {}", msg, session);
             session.getRemote().sendString(msg, null);
         }
     }
