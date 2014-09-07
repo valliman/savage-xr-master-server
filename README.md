@@ -19,16 +19,19 @@ Savage XR gaming servers via heart-beating.
 > Java 1.7
 
 ### Getting Started
-Simply download the [savage-master-server-1.2.3.jar](https://github.com/valliman/savage-xr-master-server/releases/download/1.2.3/savage-master-server-1.2.3.jar)
+Simply download the [savage-master-server-1.3.0.jar](https://github.com/valliman/savage-xr-master-server/releases/download/1.3.0/savage-master-server-1.3.0.jar)
 
 > Open a command shell and start the server with the following command:
-* `java -jar savage-master-server-1.2.3.jar`
+* `java -jar savage-master-server-1.3.0.jar`
 
 ### Configuration
 The server allows to configure some properties, which are listed below:
 
 > the listening port of the master server, default: 11236
 * `listening.port = 11236` 
+
+> the websocket port of the master server, default: 8080
+* `websocket.port = 8080` 
 
 > the path and name of the dat file to be written, default: ./gamelist_full.dat
 * `dat.file = ./gamelist_full.dat` 
