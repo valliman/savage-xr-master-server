@@ -24,17 +24,7 @@ public class StateSessionWriter implements ServerStatesUpdateListener, SessionLi
     private final Gson gson;
 
     public StateSessionWriter() {
-        gson = new GsonBuilder().addSerializationExclusionStrategy(new ExclusionStrategy() {
-            @Override
-            public boolean shouldSkipField(FieldAttributes field) {
-                return (field.getName().equals("time") || field.getName().equals("rawIp"));
-            }
-
-            @Override
-            public boolean shouldSkipClass(Class<?> aClass) {
-                return false;
-            }
-        }).create();
+        gson = new GsonBuilder().addSerializationExclusionStrategy(new StateExclusionStrategy()).create();
     }
 
     @Override
@@ -43,6 +33,11 @@ public class StateSessionWriter implements ServerStatesUpdateListener, SessionLi
         for (Session session : SessionManager.INSTANCE.getSessions()) {
             sendState(session);
         }
+    }
+
+    @Override
+    public void sessionAdded(Session session) {
+        sendState(session);
     }
 
     private void sendState(Session session) {
@@ -54,17 +49,13 @@ public class StateSessionWriter implements ServerStatesUpdateListener, SessionLi
     }
 
     @Override
-    public void sessionAdded(Session session) {
-        sendState(session);
-    }
-
-    @Override
     public void sessionRemoved(Session session) {
         // nothing to do
     }
 
-    private static class State {
+    private static final class State {
 
+        @SuppressWarnings("UnusedDeclaration")
         private final Set<ServerState> servers;
 
         private State() {
@@ -73,6 +64,18 @@ public class StateSessionWriter implements ServerStatesUpdateListener, SessionLi
 
         private State(Set<ServerState> servers) {
             this.servers = servers;
+        }
+    }
+
+    private static final class StateExclusionStrategy implements ExclusionStrategy {
+        @Override
+        public boolean shouldSkipField(FieldAttributes field) {
+            return (field.getName().equals("time") || field.getName().equals("rawIp"));
+        }
+
+        @Override
+        public boolean shouldSkipClass(Class<?> aClass) {
+            return false;
         }
     }
 
