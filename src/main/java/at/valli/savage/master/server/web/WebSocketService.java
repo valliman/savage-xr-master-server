@@ -9,7 +9,7 @@ import org.eclipse.jetty.server.Server;
 /**
  * Created by valli on 06.09.2014.
  */
-public class WebSocketService implements Service {
+public final class WebSocketService implements Service {
 
     private static final Logger LOG = LogManager.getLogger(WebSocketService.class);
 

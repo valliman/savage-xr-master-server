@@ -36,6 +36,7 @@ public enum SessionManager {
         sessionListeners.add(listener);
     }
 
+    @SuppressWarnings("UnusedDeclaration")
     public void removeListener(final SessionListener listener) {
         sessionListeners.remove(listener);
     }

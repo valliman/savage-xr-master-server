@@ -36,6 +36,7 @@ public final class ServerState {
         return time;
     }
 
+    @SuppressWarnings("UnusedDeclaration")
     public int getVersion() {
         return version;
     }

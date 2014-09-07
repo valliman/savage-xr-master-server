@@ -11,7 +11,7 @@ import org.eclipse.jetty.websocket.api.annotations.WebSocket;
  * Created by valli on 06.09.2014.
  */
 @WebSocket(maxTextMessageSize = 64 * 1024)
-public class WebSocketHandler {
+public final class WebSocketHandler {
 
     private static final Logger LOG = LogManager.getLogger(WebSocketHandler.class);
 

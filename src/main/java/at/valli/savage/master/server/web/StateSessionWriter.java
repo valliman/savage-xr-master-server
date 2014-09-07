@@ -11,13 +11,14 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.websocket.api.Session;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Created by valli on 06.09.2014.
  */
-public class StateSessionWriter implements ServerStatesUpdateListener, SessionListener {
+public final class StateSessionWriter implements ServerStatesUpdateListener, SessionListener {
 
     private static final Logger LOG = LogManager.getLogger(StateSessionWriter.class);
     private final AtomicReference<State> state = new AtomicReference<>(new State());
@@ -40,17 +41,17 @@ public class StateSessionWriter implements ServerStatesUpdateListener, SessionLi
         sendState(session);
     }
 
+    @Override
+    public void sessionRemoved(Session session) {
+        // nothing to do
+    }
+
     private void sendState(Session session) {
         if (session.isOpen()) {
             String msg = gson.toJson(state.get());
             LOG.debug("sendState {} to session {}", msg, session);
             session.getRemote().sendString(msg, null);
         }
-    }
-
-    @Override
-    public void sessionRemoved(Session session) {
-        // nothing to do
     }
 
     private static final class State {
@@ -62,19 +63,23 @@ public class StateSessionWriter implements ServerStatesUpdateListener, SessionLi
             this(Collections.<ServerState>emptySet());
         }
 
-        private State(Set<ServerState> servers) {
-            this.servers = servers;
+        private State(final Set<ServerState> servers) {
+            this.servers = new HashSet<>(servers);
         }
     }
 
     private static final class StateExclusionStrategy implements ExclusionStrategy {
+
+        private static final String TIME_FIELD = "time";
+        private static final String RAW_IP_FIELD = "rawIp";
+
         @Override
-        public boolean shouldSkipField(FieldAttributes field) {
-            return (field.getName().equals("time") || field.getName().equals("rawIp"));
+        public boolean shouldSkipField(final FieldAttributes field) {
+            return (field.getName().equals(TIME_FIELD) || field.getName().equals(RAW_IP_FIELD));
         }
 
         @Override
-        public boolean shouldSkipClass(Class<?> aClass) {
+        public boolean shouldSkipClass(final Class<?> aClass) {
             return false;
         }
     }
