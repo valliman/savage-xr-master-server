@@ -27,9 +27,9 @@ public final class FutureEvaluator extends Thread {
         try {
             future.get();
         } catch (CancellationException e) {
-            // do nothing
+            LOG.debug(e.getMessage(), e);
         } catch (InterruptedException | ExecutionException e) {
-            LOG.error(e.getMessage(), e);
+            LOG.warn(e.getMessage(), e);
         }
     }
 }

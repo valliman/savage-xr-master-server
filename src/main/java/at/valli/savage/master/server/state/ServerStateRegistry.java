@@ -27,13 +27,13 @@ public final class ServerStateRegistry implements Service {
     private final Object LOCK = new Object();
     private final AtomicBoolean started = new AtomicBoolean();
     private final Set<ServerState> states = new HashSet<>();
-    private final ServerStatesUpdateListener updateListener;
+    private final Set<ServerStatesUpdateListener> updateListeners;
     private ScheduledExecutorService executorService;
     private ScheduledFuture<?> cleanTask;
 
-    public ServerStateRegistry(final ServerStatesUpdateListener updateListener) {
-        Validate.notNull(updateListener);
-        this.updateListener = updateListener;
+    public ServerStateRegistry(final Set<ServerStatesUpdateListener> updateListeners) {
+        Validate.noNullElements(updateListeners);
+        this.updateListeners = updateListeners;
     }
 
     private static boolean serverTimeout(final ServerState serverState) {
@@ -51,7 +51,7 @@ public final class ServerStateRegistry implements Service {
             }
             states.add(serverState);
             if (notify) {
-                notifyListener();
+                notifyListeners();
             }
             LOG.info("Current server registry state {}", states);
         }
@@ -61,13 +61,15 @@ public final class ServerStateRegistry implements Service {
         Validate.notNull(serverState, "serverState must not be null");
         synchronized (LOCK) {
             states.remove(serverState);
-            notifyListener();
+            notifyListeners();
             LOG.info("Current server registry state {}", states);
         }
     }
 
-    private void notifyListener() {
-        updateListener.stateUpdated(new HashSet<>(states));
+    private void notifyListeners() {
+        for (ServerStatesUpdateListener updateListener : updateListeners) {
+            updateListener.stateUpdated(new HashSet<>(states));
+        }
     }
 
     @Override
@@ -108,7 +110,7 @@ public final class ServerStateRegistry implements Service {
                     }
                 }
                 if (notifyListener) {
-                    notifyListener();
+                    notifyListeners();
                 }
             }
 
