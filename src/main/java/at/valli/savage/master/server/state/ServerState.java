@@ -1,5 +1,6 @@
 package at.valli.savage.master.server.state;
 
+import at.valli.savage.master.server.util.Bytes;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -29,7 +30,7 @@ public final class ServerState {
     }
 
     private static String toIp(byte[] rawIp) {
-        return Byte.toUnsignedInt(rawIp[0]) + "." + Byte.toUnsignedInt(rawIp[1]) + "." + Byte.toUnsignedInt(rawIp[2]) + "." + Byte.toUnsignedInt(rawIp[3]);
+        return Bytes.toUnsignedInt(rawIp[0]) + "." + Bytes.toUnsignedInt(rawIp[1]) + "." + Bytes.toUnsignedInt(rawIp[2]) + "." + Bytes.toUnsignedInt(rawIp[3]);
     }
 
     public long getTime() {
