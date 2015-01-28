@@ -12,10 +12,10 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <version.commons.lang>3.3.2</version.commons.lang>
-        <version.log4j2>2.0.2</version.log4j2>
-        <version.jetty>9.2.2.v20140723</version.jetty>
+        <version.log4j2>2.1</version.log4j2>
+        <version.jetty>9.2.7.v20150116</version.jetty>
         <version.gson>2.3</version.gson>
-        <version.slf4j>1.7.7</version.slf4j>
+        <version.slf4j>1.7.10</version.slf4j>
     </properties>
 
     <dependencies>
