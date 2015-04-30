@@ -74,8 +74,10 @@ final class UDPMessageHandler implements Runnable {
         short port = Short.reverseBytes((short) stream.readUnsignedShort());
 
         InetAddress inetAddress = InetAddress.getByAddress(ip);
-        if (inetAddress.equals(InetAddress.getLocalHost()) || inetAddress.equals(InetAddress.getLoopbackAddress())) {
+        if (inetAddress.isLoopbackAddress() || inetAddress.isSiteLocalAddress()) {
+            LOG.info("Local ip {} is being resolved", inetAddress);
             inetAddress = getExternalAddress();
+            LOG.info("Local ip has been resolved to {}", inetAddress);
         }
         return new InetSocketAddress(inetAddress, port);
     }
