@@ -1,58 +1,63 @@
 package at.valli.savage.master.server.state;
 
-import at.valli.savage.master.server.util.Bytes;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.util.Arrays;
+import java.net.InetSocketAddress;
 
 /**
  * Created by valli on 13.07.2014.
  */
 public final class ServerState {
 
+    private final InetSocketAddress senderAddress;
+    private final InetSocketAddress receiverAddress;
     private final int version;
-    private final byte[] rawIp;
-    private final String ip;
-    private final short port;
     private final long time;
 
-    public ServerState(final int version, final byte[] rawIp, final short port) {
-        Validate.notNull(rawIp, "rawIp must not be null");
+    public ServerState(final InetSocketAddress senderAddress, final InetSocketAddress logicalAddress, final int version) {
+        Validate.notNull(senderAddress, "senderAddress must not be null");
+        Validate.notNull(logicalAddress, "receiverAddress must not be null");
+        this.senderAddress = senderAddress;
+        this.receiverAddress = logicalAddress;
         this.version = version;
-        this.rawIp = Arrays.copyOf(rawIp, rawIp.length);
-        this.ip = toIp(rawIp);
-        this.port = port;
         this.time = System.nanoTime();
-    }
-
-    private static String toIp(byte[] rawIp) {
-        return Bytes.toUnsignedInt(rawIp[0]) + "." + Bytes.toUnsignedInt(rawIp[1]) + "." + Bytes.toUnsignedInt(rawIp[2]) + "." + Bytes.toUnsignedInt(rawIp[3]);
     }
 
     public long getTime() {
         return time;
     }
 
-    @SuppressWarnings("UnusedDeclaration")
     public int getVersion() {
         return version;
     }
 
     public byte[] getRawIp() {
-        return rawIp;
+        return receiverAddress.getAddress().getAddress();
     }
 
-    public short getPort() {
-        return port;
+    public int getPort() {
+        return receiverAddress.getPort();
+    }
+
+    public InetSocketAddress getSenderAddress() {
+        return senderAddress;
+    }
+
+    public InetSocketAddress getReceiverAddress() {
+        return receiverAddress;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("version", version).append("host", ip).append("port", port).toString();
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+                .append("senderAddress", senderAddress)
+                .append("receiverAddress", receiverAddress)
+                .append("version", version)
+                .toString();
     }
 
     @Override
@@ -68,14 +73,12 @@ public final class ServerState {
         }
         ServerState rhs = (ServerState) obj;
         return new EqualsBuilder()
-                .append(ip, rhs.ip)
-                .append(port, rhs.port)
-                .append(version, rhs.version)
+                .append(receiverAddress, rhs.receiverAddress)
                 .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder().append(ip).append(port).append(version).toHashCode();
+        return new HashCodeBuilder().append(receiverAddress).toHashCode();
     }
 }

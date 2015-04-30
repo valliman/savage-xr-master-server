@@ -44,7 +44,7 @@ public final class StateFileWriter implements Service, ServerStatesUpdateListene
         for (ServerState serverState : serverStates) {
             LOG.debug("Writing dat file server state {}  ...", serverState);
             stream.write(serverState.getRawIp());
-            stream.writeShort(Short.reverseBytes(serverState.getPort()));
+            stream.writeShort(Short.reverseBytes((short) serverState.getPort()));
         }
     }
 
