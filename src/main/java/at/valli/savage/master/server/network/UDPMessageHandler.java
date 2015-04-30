@@ -5,10 +5,8 @@ import at.valli.savage.master.server.state.ServerStateRegistry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.net.DatagramPacket;
+import java.io.*;
+import java.net.*;
 import java.util.Arrays;
 
 /**
@@ -23,10 +21,12 @@ final class UDPMessageHandler implements Runnable {
 
     private final ServerStateRegistry stateRegistry;
     private final DatagramPacket packet;
+    private final InetSocketAddress address;
 
     UDPMessageHandler(final ServerStateRegistry stateRegistry, final DatagramPacket packet) {
         this.stateRegistry = stateRegistry;
         this.packet = packet;
+        this.address = (InetSocketAddress) packet.getSocketAddress();
     }
 
     @Override
@@ -65,9 +65,30 @@ final class UDPMessageHandler implements Runnable {
 
     private ServerState readServerState(final DataInputStream stream) throws IOException {
         int version = stream.readByte();
+        return new ServerState(address, readAddress(stream), version);
+    }
+
+    private InetSocketAddress readAddress(final DataInputStream stream) throws IOException {
         byte[] ip = new byte[4];
         stream.readFully(ip, 0, 4);
         short port = Short.reverseBytes((short) stream.readUnsignedShort());
-        return new ServerState(version, ip, port);
+
+        InetAddress inetAddress = InetAddress.getByAddress(ip);
+        if (inetAddress.isLoopbackAddress() || inetAddress.isSiteLocalAddress()) {
+            LOG.info("Local ip {} is being resolved", inetAddress);
+            inetAddress = getExternalAddress();
+            LOG.info("Local ip has been resolved to {}", inetAddress);
+        }
+        return new InetSocketAddress(inetAddress, port);
+    }
+
+    private InetAddress getExternalAddress() throws IOException {
+        URL url = new URL("http://checkip.amazonaws.com");
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()))) {
+            String externalIp = in.readLine();
+            urlConnection.disconnect();
+            return InetAddress.getByName(externalIp);
+        }
     }
 }

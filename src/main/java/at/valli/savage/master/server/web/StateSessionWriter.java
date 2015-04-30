@@ -2,14 +2,12 @@ package at.valli.savage.master.server.web;
 
 import at.valli.savage.master.server.state.ServerState;
 import at.valli.savage.master.server.state.ServerStatesUpdateListener;
-import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldAttributes;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.websocket.api.Session;
 
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,7 +23,7 @@ public final class StateSessionWriter implements ServerStatesUpdateListener, Ses
     private final Gson gson;
 
     public StateSessionWriter() {
-        gson = new GsonBuilder().addSerializationExclusionStrategy(new StateExclusionStrategy()).create();
+        gson = new GsonBuilder().registerTypeAdapter(ServerState.class, new ServerStateSerializer()).create();
     }
 
     @Override
@@ -68,20 +66,14 @@ public final class StateSessionWriter implements ServerStatesUpdateListener, Ses
         }
     }
 
-    private static final class StateExclusionStrategy implements ExclusionStrategy {
-
-        private static final String TIME_FIELD = "time";
-        private static final String RAW_IP_FIELD = "rawIp";
-
+    private static final class ServerStateSerializer implements JsonSerializer<ServerState> {
         @Override
-        public boolean shouldSkipField(final FieldAttributes field) {
-            return (field.getName().equals(TIME_FIELD) || field.getName().equals(RAW_IP_FIELD));
-        }
-
-        @Override
-        public boolean shouldSkipClass(final Class<?> aClass) {
-            return false;
+        public JsonElement serialize(ServerState serverState, Type type, JsonSerializationContext jsonSerializationContext) {
+            JsonObject json = new JsonObject();
+            json.addProperty("port", serverState.getReceiverAddress().getPort());
+            json.addProperty("ip", serverState.getReceiverAddress().getHostString());
+            json.addProperty("version", serverState.getVersion());
+            return json;
         }
     }
-
 }
