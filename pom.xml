@@ -4,7 +4,7 @@
 
     <groupId>at.valli.savage</groupId>
     <artifactId>master-server</artifactId>
-    <version>1.4.1-SNAPSHOT</version>
+    <version>1.4.0</version>
     <packaging>jar</packaging>
 
     <properties>
