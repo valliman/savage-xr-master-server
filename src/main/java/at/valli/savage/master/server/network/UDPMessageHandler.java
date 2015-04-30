@@ -95,8 +95,9 @@ final class UDPMessageHandler implements Runnable {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try (BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()))) {
             String externalIp = in.readLine();
-            urlConnection.disconnect();
             return InetAddress.getByName(externalIp);
+        } finally {
+            urlConnection.disconnect();
         }
     }
 }
