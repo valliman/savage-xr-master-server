@@ -18,6 +18,7 @@ final class UDPMessageHandler implements Runnable {
     private static final byte[] HEADER = {(byte) 0x9E, 0x4c, 0x23, 0x00, 0x00};
     private static final int SERVER_HEARTBEAT = 0xCA;
     private static final int SERVER_SHUTDOWN = 0xCB;
+    private static final String IP_CHECK_URL = "http://checkip.amazonaws.com";
 
     private final ServerStateRegistry stateRegistry;
     private final DatagramPacket packet;
@@ -91,7 +92,7 @@ final class UDPMessageHandler implements Runnable {
     }
 
     private InetAddress getExternalAddress() throws IOException {
-        URL url = new URL("http://checkip.amazonaws.com");
+        URL url = new URL(IP_CHECK_URL);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try (BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()))) {
             String externalIp = in.readLine();
