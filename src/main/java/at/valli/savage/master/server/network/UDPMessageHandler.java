@@ -18,6 +18,7 @@ final class UDPMessageHandler implements Runnable {
     private static final byte[] HEADER = {(byte) 0x9E, 0x4c, 0x23, 0x00, 0x00};
     private static final int SERVER_HEARTBEAT = 0xCA;
     private static final int SERVER_SHUTDOWN = 0xCB;
+    private static final String IP_CHECK_URL = "http://checkip.amazonaws.com";
 
     private final ServerStateRegistry stateRegistry;
     private final DatagramPacket packet;
@@ -65,30 +66,39 @@ final class UDPMessageHandler implements Runnable {
 
     private ServerState readServerState(final DataInputStream stream) throws IOException {
         int version = stream.readByte();
-        return new ServerState(address, readAddress(stream), version);
+        return new ServerState(address, determineSocketAddress(stream), version);
     }
 
-    private InetSocketAddress readAddress(final DataInputStream stream) throws IOException {
+    private InetSocketAddress determineSocketAddress(final DataInputStream stream) throws IOException {
         byte[] ip = new byte[4];
         stream.readFully(ip, 0, 4);
         short port = Short.reverseBytes((short) stream.readUnsignedShort());
+        InetAddress receiverAddress = determineReceiverAddress(ip);
+        return new InetSocketAddress(receiverAddress, port);
+    }
 
-        InetAddress inetAddress = InetAddress.getByAddress(ip);
-        if (inetAddress.isLoopbackAddress() || inetAddress.isSiteLocalAddress()) {
-            LOG.info("Local ip {} is being resolved", inetAddress);
-            inetAddress = getExternalAddress();
-            LOG.info("Local ip has been resolved to {}", inetAddress);
+    private InetAddress determineReceiverAddress(byte[] ip) throws IOException {
+        InetAddress receiverAddress = InetAddress.getByAddress(ip);
+        InetAddress senderAddress = address.getAddress();
+        LOG.info("Sender ip {}, Receiver ip {}", senderAddress, receiverAddress);
+        if (receiverAddress.isLoopbackAddress() || receiverAddress.isSiteLocalAddress()) {
+            receiverAddress = senderAddress;
+            if (receiverAddress.isLoopbackAddress() || receiverAddress.isSiteLocalAddress()) {
+                receiverAddress = getExternalAddress();
+                LOG.info("Sender ip {} resolved to {}", senderAddress, receiverAddress);
+            }
         }
-        return new InetSocketAddress(inetAddress, port);
+        return receiverAddress;
     }
 
     private InetAddress getExternalAddress() throws IOException {
-        URL url = new URL("http://checkip.amazonaws.com");
+        URL url = new URL(IP_CHECK_URL);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try (BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()))) {
             String externalIp = in.readLine();
-            urlConnection.disconnect();
             return InetAddress.getByName(externalIp);
+        } finally {
+            urlConnection.disconnect();
         }
     }
 }
